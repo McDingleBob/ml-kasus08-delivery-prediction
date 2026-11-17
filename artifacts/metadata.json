@@ -1,0 +1,114 @@
+{
+  "created_at": "2026-11-16T13:33:42.621928+07:00",
+  "version": "0.1.0-review",
+  "case": "08-keterlambatan-paket",
+  "source_url": "https://github.com/nurhikam/mkb-ml-project",
+  "source_sha256": "2821b50eac1b02181cacbfb52fca784b2b5be930c73e5c671a877eeec6a600ab",
+  "features": [
+    "jam_pickup",
+    "jarak_km",
+    "jumlah_transit",
+    "janji_hari",
+    "berat_kg",
+    "kota_tujuan",
+    "layanan",
+    "metode_bayar",
+    "cuaca_saat_pickup"
+  ],
+  "excluded_features": {
+    "id_resi": "identifier, not a causal predictor",
+    "tanggal_pickup": "split only; no engineered features in baseline",
+    "volume_hub_hari": "full-day count not known at pickup; excluded to prevent future-information leakage"
+  },
+  "selection_rule": "highest validation average precision (non-interpolated PR-AUC), fixed two-model comparison",
+  "selected_model": "hist_gradient_boosting",
+  "threshold": 0.06603616610212668,
+  "false_negative_cost": 50000,
+  "false_positive_cost": 5000,
+  "validation": {
+    "logistic_regression": {
+      "pr_auc_average_precision": 0.4093617076003751,
+      "threshold": 0.028308793102361233,
+      "tn": 0,
+      "fp": 5174,
+      "fn": 0,
+      "tp": 1449,
+      "precision": 0.21878302883889475,
+      "recall": 1.0,
+      "cost_rupiah": 25870000
+    },
+    "hist_gradient_boosting": {
+      "pr_auc_average_precision": 0.4224249325231295,
+      "threshold": 0.06603616610212668,
+      "tn": 286,
+      "fp": 4888,
+      "fn": 27,
+      "tp": 1422,
+      "precision": 0.22535657686212363,
+      "recall": 0.9813664596273292,
+      "cost_rupiah": 25790000
+    }
+  },
+  "split": {
+    "train": {
+      "n": 26633,
+      "start": "2025-01-01",
+      "end": "2025-12-31"
+    },
+    "validation": {
+      "n": 6623,
+      "start": "2026-01-01",
+      "end": "2026-03-31"
+    },
+    "test": {
+      "n": 6744,
+      "start": "2026-04-01",
+      "end": "2026-06-30"
+    }
+  },
+  "cleaning": {
+    "raw_rows": 40500,
+    "duplicate_rows_removed": 500,
+    "unique_rows": 40000,
+    "distance_missing_raw": 813,
+    "weather_missing_raw": 406,
+    "invalid_weight_unique": 1274,
+    "weight_policy": "nonpositive or >100kg -> missing, then train median; >100kg limit is project scope assumption, not proof of grams"
+  },
+  "versions": {
+    "pandas": "3.0.6",
+    "numpy": "2.4.3",
+    "scikit-learn": "1.9.0",
+    "joblib": "1.5.3",
+    "fastapi": "0.133.1",
+    "pydantic": "2.13.4",
+    "uvicorn": "0.41.0"
+  },
+  "python": "3.11.16",
+  "test_evaluations": 1,
+  "audit_note": "Initial source inventory described full raw data including overall target prevalence before splitting. No test model scores used in model/threshold selection. Not a perfectly sealed holdout audit.",
+  "test_metrics": {
+    "logistic_regression": {
+      "pr_auc_average_precision": 0.3600067557822115,
+      "threshold": 0.028308793102361233,
+      "tn": 0,
+      "fp": 5805,
+      "fn": 0,
+      "tp": 939,
+      "precision": 0.13923487544483987,
+      "recall": 1.0,
+      "cost_rupiah": 29025000
+    },
+    "hist_gradient_boosting": {
+      "pr_auc_average_precision": 0.3678697055504617,
+      "threshold": 0.06603616610212668,
+      "tn": 281,
+      "fp": 5524,
+      "fn": 9,
+      "tp": 930,
+      "precision": 0.14409668422683608,
+      "recall": 0.9904153354632588,
+      "cost_rupiah": 28070000
+    }
+  }
+}
