@@ -1,6 +1,6 @@
 # Prediksi Keterlambatan Paket — Kasus 08
 
-**Demo pendidikan nonoperasional, menggunakan data sintetis.** Anggota: Bob Nolen Barnabas Munthe (2406157), Muhammad Riyu Saputra (NIM belum terverifikasi), kelas 5B. Pembagian kerja dan commit anggota harus diisi berdasarkan kontribusi nyata; draf ini dibantu AI. URL repositori, aplikasi, dan video belum tersedia.
+**Demo pendidikan nonoperasional, menggunakan data sintetis.** Anggota: Bob Nolen Barnabas Munthe (2406157), Muhammad Riyu Saputra (NIM belum terverifikasi), kelas 5B. Pembagian kerja dan commit anggota harus diisi berdasarkan kontribusi nyata; draf ini dibantu AI. Repositori publik: https://github.com/McDingleBob/ml-kasus08-delivery-prediction . URL aplikasi dan video belum tersedia.
 
 Sumber data dan brief: https://github.com/nurhikam/mkb-ml-project/tree/main/kasus/08-keterlambatan-paket . Sheet kelas menyatakan nomor topik 8; pencocokan dengan gambar daftar topik belum terverifikasi.
 
