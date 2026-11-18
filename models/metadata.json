@@ -1,0 +1,152 @@
+{
+  "nama_model": "Regresi logistik (C=0.1)",
+  "tanggal_dilatih": "2026-11-18",
+  "versi": {
+    "python": "3.13.18",
+    "scikit-learn": "1.9.1",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "sumber_data": "https://github.com/nurhikam/mkb-ml-project/tree/main/kasus/08-keterlambatan-paket",
+  "sha256_data": "2821b50eac1b02181cacbfb52fca784b2b5be930c73e5c671a877eeec6a600ab",
+  "baris": {
+    "mentah": 40500,
+    "unik": 40000,
+    "train": 26633,
+    "validation": 6623,
+    "test_disimpan_tidak_dievaluasi": 6744
+  },
+  "periode_train": "2025-01-01 s.d. 2025-12-31",
+  "periode_validation": "2026-01-01 s.d. 2026-03-31",
+  "fitur_angka": [
+    "jam_pickup",
+    "jarak_km",
+    "jumlah_transit",
+    "janji_hari",
+    "berat_kg",
+    "volume_hub_kemarin",
+    "volume_kemarin_tinggi",
+    "kelonggaran_janji",
+    "pickup_malam"
+  ],
+  "fitur_kategori": [
+    "kota_tujuan",
+    "layanan",
+    "metode_bayar",
+    "cuaca_saat_pickup"
+  ],
+  "threshold_kabari": 0.1,
+  "threshold_prioritaskan": 0.5,
+  "biaya": {
+    "terlewat_FN": 50000,
+    "salah_kabar_FP": 5000
+  },
+  "patokan_cleaning": {
+    "median_berat": 1.34,
+    "jarak_per_kota": {
+      "Balikpapan": 1400.0,
+      "Bekasi": 130.0,
+      "Bogor": 125.0,
+      "Cirebon": 130.0,
+      "Denpasar": 1079.0,
+      "Jakarta": 150.0,
+      "Makassar": 1501.0,
+      "Malang": 720.0,
+      "Medan": 1901.0,
+      "Palembang": 860.0,
+      "Pontianak": 901.0,
+      "Semarang": 370.0,
+      "Surabaya": 691.0,
+      "Tasikmalaya": 110.0,
+      "Yogyakarta": 390.0
+    }
+  },
+  "metrik_validation": {
+    "pr_auc_model": 0.605,
+    "pr_auc_baseline": 0.409,
+    "pr_auc_acak": 0.219,
+    "pr_auc_jan_feb_model": 0.373,
+    "pr_auc_jan_feb_baseline": 0.371,
+    "biaya_model_rp": 20730000,
+    "biaya_baseline_rp": 25870000,
+    "biaya_kabari_semua_rp": 25870000,
+    "konfusi_model": {
+      "threshold": 0.1,
+      "dikabari": 4000,
+      "TP": 1304,
+      "FP": 2696,
+      "FN": 145,
+      "recall": 0.8999309868875086,
+      "biaya (Rp)": 20730000
+    }
+  },
+  "tabel_tuning": [
+    {
+      "model": "Regresi logistik",
+      "pengaturan": "C=0.1",
+      "PR-AUC val": 0.6049,
+      "PR-AUC Jan+Feb": 0.3733
+    },
+    {
+      "model": "Regresi logistik",
+      "pengaturan": "C=10",
+      "PR-AUC val": 0.6043,
+      "PR-AUC Jan+Feb": 0.3712
+    },
+    {
+      "model": "Regresi logistik",
+      "pengaturan": "C=1",
+      "PR-AUC val": 0.6043,
+      "PR-AUC Jan+Feb": 0.3713
+    },
+    {
+      "model": "Gradient Boosting",
+      "pengaturan": "lr=0.03, depth=3, leaf=100",
+      "PR-AUC val": 0.5921,
+      "PR-AUC Jan+Feb": 0.3869
+    },
+    {
+      "model": "Gradient Boosting",
+      "pengaturan": "lr=0.03, depth=3, leaf=20",
+      "PR-AUC val": 0.5904,
+      "PR-AUC Jan+Feb": 0.386
+    },
+    {
+      "model": "Gradient Boosting",
+      "pengaturan": "lr=0.03, depth=None, leaf=100",
+      "PR-AUC val": 0.5855,
+      "PR-AUC Jan+Feb": 0.3825
+    },
+    {
+      "model": "Gradient Boosting",
+      "pengaturan": "lr=0.1, depth=3, leaf=20",
+      "PR-AUC val": 0.5823,
+      "PR-AUC Jan+Feb": 0.3811
+    },
+    {
+      "model": "Gradient Boosting",
+      "pengaturan": "lr=0.1, depth=3, leaf=100",
+      "PR-AUC val": 0.5805,
+      "PR-AUC Jan+Feb": 0.3814
+    },
+    {
+      "model": "Gradient Boosting",
+      "pengaturan": "lr=0.1, depth=None, leaf=100",
+      "PR-AUC val": 0.5789,
+      "PR-AUC Jan+Feb": 0.3762
+    },
+    {
+      "model": "Gradient Boosting",
+      "pengaturan": "lr=0.1, depth=None, leaf=20",
+      "PR-AUC val": 0.5771,
+      "PR-AUC Jan+Feb": 0.386
+    },
+    {
+      "model": "Gradient Boosting",
+      "pengaturan": "lr=0.03, depth=None, leaf=20",
+      "PR-AUC val": 0.5745,
+      "PR-AUC Jan+Feb": 0.3767
+    }
+  ],
+  "evaluasi_test": "belum dijalankan oleh train.py; lihat bagian 10 notebook (sekali saja)"
+}

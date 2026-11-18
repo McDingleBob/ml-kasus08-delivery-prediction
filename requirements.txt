@@ -1,9 +1,12 @@
-pandas==3.0.6
-numpy==2.4.3
-scikit-learn==1.9.0
-joblib==1.5.3
+# versi yang dipakai saat melatih models/model.joblib (lihat models/metadata.json)
+pandas==3.0.5
+numpy==2.5.3
+scikit-learn==1.9.1
+joblib==1.6.0
+pydantic==2.13.5
+# aplikasi
 fastapi==0.133.1
-pydantic==2.13.4
-uvicorn==0.41.0
+uvicorn==0.54.0
+# test dan notebook
 httpx==0.28.1
-matplotlib==3.11.1
+matplotlib==3.11.2

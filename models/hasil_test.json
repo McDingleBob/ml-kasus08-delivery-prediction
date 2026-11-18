@@ -1,0 +1,54 @@
+{
+  "tanggal_evaluasi": "2026-11-18",
+  "model": "Regresi logistik (C=0.1)",
+  "threshold_kabari": 0.1,
+  "baris_test": 6744,
+  "proporsi_terlambat": 0.139,
+  "hasil": {
+    "Tidak pernah mengabari": {
+      "PR-AUC": null,
+      "threshold": null,
+      "dikabari": 0,
+      "TP": 0,
+      "FP": 0,
+      "FN": 939,
+      "recall": 0.0,
+      "biaya (Rp)": 46950000,
+      "% paket dikabari": 0.0
+    },
+    "Kabari semua paket": {
+      "PR-AUC": null,
+      "threshold": null,
+      "dikabari": 6744,
+      "TP": 939,
+      "FP": 5805,
+      "FN": 0,
+      "recall": 1.0,
+      "biaya (Rp)": 29025000,
+      "% paket dikabari": 100.0
+    },
+    "Baseline (LR fitur asli)": {
+      "PR-AUC": 0.3595702826,
+      "threshold": 0.01,
+      "dikabari": 6744,
+      "TP": 939,
+      "FP": 5805,
+      "FN": 0,
+      "recall": 1.0,
+      "biaya (Rp)": 29025000,
+      "% paket dikabari": 100.0
+    },
+    "Model final": {
+      "PR-AUC": 0.3623992835,
+      "threshold": 0.1,
+      "dikabari": 3567,
+      "TP": 752,
+      "FP": 2815,
+      "FN": 187,
+      "recall": 0.8008519702,
+      "biaya (Rp)": 23425000,
+      "% paket dikabari": 52.8914590747
+    }
+  },
+  "catatan": "Dijalankan satu kali memakai kode bagian 10 notebook; model/threshold tidak diubah sesudahnya. Periode test sebelumnya pernah dievaluasi tim dengan model lain (16 dan 18 Nov)."
+}

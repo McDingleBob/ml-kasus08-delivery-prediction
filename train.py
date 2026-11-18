@@ -1,80 +1,151 @@
-from sklearn.metrics import average_precision_score,confusion_matrix,precision_score,recall_score
+"""Melatih model final, mengikuti bagian 1–9 notebook `notebooks/ML_Kasus08_Final.ipynb`.
+
+    python train.py
+
+Hanya memakai TRAIN (2025) dan VALIDATION (Jan–Mar 2026). Data TEST (Apr–Jun 2026)
+dipisahkan dan TIDAK disentuh di sini; evaluasi TEST hanya ada di bagian 10 notebook
+dan dijalankan satu kali.
+"""
+import hashlib
+import itertools
+import json
+import platform
+from datetime import date
+from pathlib import Path
+
+import joblib
 import numpy as np
 import pandas as pd
+import sklearn
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import average_precision_score, confusion_matrix
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-def temporal_split(d):
-    dates=pd.to_datetime(d['tanggal_pickup'],errors='raise')
-    return (d.loc[dates<'2026-01-01'].copy(),d.loc[(dates>='2026-01-01')&(dates<'2026-04-01')].copy(),d.loc[dates>='2026-04-01'].copy())
+from src.features import (ANGKA_FINAL, FITUR_ASLI_ANGKA, FITUR_KATEGORI, KOLOM_FINAL, TARGET,
+                          buat_fitur, hitung_volume_kemarin, isi_kosong, rapikan)
 
-def metrics(y,p,threshold):
-    pred=np.asarray(p)>=threshold
-    tn,fp,fn,tp=confusion_matrix(y,pred,labels=[0,1]).ravel()
-    return dict(pr_auc_average_precision=float(average_precision_score(y,p)),threshold=float(threshold),tn=int(tn),fp=int(fp),fn=int(fn),tp=int(tp),precision=float(precision_score(y,pred,zero_division=0)),recall=float(recall_score(y,pred,zero_division=0)),cost_rupiah=int(50000*fn+5000*fp))
-
-def choose_threshold(y,p):
-    # Evaluate every distinct validation score in O(n log n), including all-negative.
-    y=np.asarray(y); p=np.asarray(p); order=np.argsort(-p,kind='stable'); p=p[order]; y=y[order]
-    tp=np.cumsum(y); fp=np.cumsum(1-y); costs=50000*(y.sum()-tp)+5000*fp
-    ends=np.r_[np.flatnonzero(p[:-1]!=p[1:]),len(p)-1]
-    best=ends[np.argmin(costs[ends])]
-    if 50000*y.sum()<costs[best]: return float(np.nextafter(p[0],np.inf))
-    return float(p[best])
+ROOT = Path(__file__).resolve().parent
+SHA_DATA = '2821b50eac1b02181cacbfb52fca784b2b5be930c73e5c671a877eeec6a600ab'
+BIAYA_FN, BIAYA_FP = 50_000, 5_000
+BATAS_TEST, BATAS_VAL = '2026-04-01', '2026-01-01'
 
 
-def build(output,finalize=False):
-    from pathlib import Path
-    from datetime import datetime
-    import json,hashlib,platform,importlib.metadata,joblib
-    from sklearn.compose import ColumnTransformer
-    from sklearn.pipeline import Pipeline
-    from sklearn.preprocessing import FunctionTransformer,OneHotEncoder,StandardScaler
-    from sklearn.impute import SimpleImputer
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.ensemble import HistGradientBoostingClassifier
-    from src.features import prepare,FEATURES,NUMERIC,CATEGORICAL
-    output=Path(output)
-    if (output/'TEST_EVALUATED_ONCE.json').exists():
-        raise RuntimeError('Final audit exists: use a separate preview output; never overwrite final metadata.')
-    root=Path(__file__).resolve().parent
-    source=root/'data'/'raw.csv'
-    raw=pd.read_csv(source)
-    duplicates=int(raw.duplicated().sum())
-    d=raw.drop_duplicates().copy()
-    a,v,t=temporal_split(d)
-    assert a.id_resi.is_unique and v.id_resi.is_unique and t.id_resi.is_unique
-    assert set(a.id_resi).isdisjoint(t.id_resi) and set(v.id_resi).isdisjoint(t.id_resi)
-    models={}; validation={}
-    for name,estimator in [('logistic_regression',LogisticRegression(max_iter=2000,random_state=42)),('hist_gradient_boosting',HistGradientBoostingClassifier(max_iter=150,max_leaf_nodes=15,l2_regularization=5,learning_rate=.07,random_state=42))]:
-        pre=ColumnTransformer([
-            ('num',Pipeline([('impute',SimpleImputer(strategy='median',add_indicator=True)),('scale',StandardScaler())]),NUMERIC),
-            ('cat',Pipeline([('impute',SimpleImputer(strategy='most_frequent')),('onehot',OneHotEncoder(handle_unknown='ignore',sparse_output=False))]),CATEGORICAL)
-        ])
-        pipe=Pipeline([('clean',FunctionTransformer(prepare,validate=False)),('preprocess',pre),('model',estimator)])
-        pipe.fit(a.drop(columns=['terlambat']),a.terlambat)
-        prob=pipe.predict_proba(v.drop(columns=['terlambat']))[:,1]
-        threshold=choose_threshold(v.terlambat.to_numpy(),prob)
-        validation[name]=metrics(v.terlambat,prob,threshold)
-        models[name]=pipe
-    selected=max(validation,key=lambda n:validation[n]['pr_auc_average_precision'])
-    threshold=validation[selected]['threshold']
-    metadata=dict(created_at=datetime.now().astimezone().isoformat(),version='0.1.0-review',case='08-keterlambatan-paket',source_url='https://github.com/nurhikam/mkb-ml-project',source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),features=FEATURES,excluded_features={'id_resi':'identifier, not a causal predictor','tanggal_pickup':'split only; no engineered features in baseline','volume_hub_hari':'full-day count not known at pickup; excluded to prevent future-information leakage'},selection_rule='highest validation average precision (non-interpolated PR-AUC), fixed two-model comparison',selected_model=selected,threshold=threshold,false_negative_cost=50000,false_positive_cost=5000,validation=validation,split={key:dict(n=len(part),start=str(part.tanggal_pickup.min()),end=str(part.tanggal_pickup.max())) for key,part in [('train',a),('validation',v),('test',t)]},cleaning={'raw_rows':len(raw),'duplicate_rows_removed':duplicates,'unique_rows':len(d),'distance_missing_raw':int(raw.jarak_km.isna().sum()),'weather_missing_raw':int(raw.cuaca_saat_pickup.isna().sum()),'invalid_weight_unique':int(((d.berat_kg<=0)|(d.berat_kg>100)).sum()),'weight_policy':'nonpositive or >100kg -> missing, then train median; >100kg limit is project scope assumption, not proof of grams'},versions={n:importlib.metadata.version(n) for n in ['pandas','numpy','scikit-learn','joblib','fastapi','pydantic','uvicorn']},python=platform.python_version(),test_evaluations=0,audit_note='Initial source inventory described full raw data including overall target prevalence before splitting. No test model scores used in model/threshold selection. Not a perfectly sealed holdout audit.')
-    output=Path(output); output.mkdir(parents=True,exist_ok=True)
-    # Preview/test-suite runs NEVER calculate test scores.
-    if finalize:
-        receipt=output/'TEST_EVALUATED_ONCE.json'
-        if receipt.exists(): raise RuntimeError('Test already evaluated. Do not reopen or retune against holdout.')
-        metadata['test_metrics']={name:metrics(t.terlambat,model.predict_proba(t.drop(columns=['terlambat']))[:,1],validation[name]['threshold']) for name,model in models.items()}
-        metadata['test_evaluations']=1
-        receipt.write_text(json.dumps({'created_at':metadata['created_at'],'selected_before_test':selected,'threshold_before_test':threshold,'test_metrics':metadata['test_metrics'],'source_sha256':metadata['source_sha256']},indent=2),encoding='utf-8')
-    joblib.dump(models[selected],output/'model.joblib')
-    (output/'metadata.json').write_text(json.dumps(metadata,indent=2),encoding='utf-8')
-    (root/'data'/'clean.csv').parent.mkdir(exist_ok=True)
-    pd.concat([prepare(d),d[['id_resi','tanggal_pickup','terlambat']]],axis=1).to_csv(root/'data'/'clean.csv',index=False)
+def pisah_waktu(df):
+    """Membuang duplikat persis lalu memisahkan kerja (train+val) dan test berdasarkan tanggal."""
+    df = df.drop_duplicates().reset_index(drop=True)
+    assert df['id_resi'].is_unique, 'Ada resi ganda dengan isi berbeda'
+    df['tanggal_pickup'] = pd.to_datetime(df['tanggal_pickup'])
+    test_mentah = df[df['tanggal_pickup'] >= BATAS_TEST].copy()
+    kerja = df[df['tanggal_pickup'] < BATAS_TEST].copy()
+    return df, kerja, test_mentah
+
+
+def pipa(model, angka, skala=True):
+    langkah_angka = [('isi', SimpleImputer(strategy='median'))] + ([('skala', StandardScaler())] if skala else [])
+    olah = ColumnTransformer([
+        ('angka', Pipeline(langkah_angka), angka),
+        ('kategori', Pipeline([('isi', SimpleImputer(strategy='most_frequent')),
+                               ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False))]), FITUR_KATEGORI),
+    ])
+    return Pipeline([('olah', olah), ('model', model)])
+
+
+def hitung_biaya(y, proba, t):
+    tn, fp, fn, tp = confusion_matrix(y, (proba >= t).astype(int), labels=[0, 1]).ravel()
+    return {'threshold': float(t), 'dikabari': int(tp + fp), 'TP': int(tp), 'FP': int(fp), 'FN': int(fn),
+            'recall': float(tp / (tp + fn)), 'biaya (Rp)': int(fn * BIAYA_FN + fp * BIAYA_FP)}
+
+
+def pilih_threshold(y, proba):
+    """Threshold 0,01–0,90 (langkah 0,01) dengan total biaya validation paling kecil."""
+    kurva = pd.DataFrame([hitung_biaya(y, proba, t) for t in np.round(np.arange(0.01, 0.91, 0.01), 2)])
+    return float(kurva.loc[kurva['biaya (Rp)'].idxmin(), 'threshold'])
+
+
+def latih(sumber=ROOT / 'data' / 'raw.csv', keluaran=ROOT / 'models'):
+    isi = Path(sumber).read_bytes()
+    assert hashlib.sha256(isi).hexdigest() == SHA_DATA, 'Dataset berbeda!'
+    df, kerja, test_mentah = pisah_waktu(pd.read_csv(sumber))
+    volume_kemarin = hitung_volume_kemarin(df)        # fitur saja (bukan target)
+
+    kerja = rapikan(kerja)
+    train = kerja[kerja['tanggal_pickup'] < BATAS_VAL].copy()
+    val = kerja[kerja['tanggal_pickup'] >= BATAS_VAL].copy()
+    patokan = {'jarak_per_kota': train.groupby('kota_tujuan')['jarak_km'].median(),
+               'median_berat': train['berat_kg'].median()}      # HANYA dari train
+    train_f = buat_fitur(isi_kosong(train, patokan), volume_kemarin)
+    val_f = buat_fitur(isi_kosong(val, patokan), volume_kemarin)
+    y_train, y_val = train_f[TARGET].values, val_f[TARGET].values
+    bulan_val = val_f['tanggal_pickup'].dt.month.values
+
+    def nilai_ap(proba):
+        return {'PR-AUC val': float(average_precision_score(y_val, proba)),
+                'PR-AUC Jan+Feb': float(average_precision_score(y_val[bulan_val < 3], proba[bulan_val < 3]))}
+
+    # Baseline wajib: regresi logistik, fitur asli, tanpa volume
+    fitur_baseline = FITUR_ASLI_ANGKA + FITUR_KATEGORI
+    baseline = pipa(LogisticRegression(max_iter=3000), FITUR_ASLI_ANGKA).fit(train_f[fitur_baseline], y_train)
+    p_base = baseline.predict_proba(val_f[fitur_baseline])[:, 1]
+
+    # Kandidat model final (sama dengan tabel tuning di bagian 8 notebook)
+    kandidat = []
+    for C in [0.1, 1, 10]:
+        kandidat.append(('Regresi logistik', f'C={C}', pipa(LogisticRegression(C=C, max_iter=3000), ANGKA_FINAL)))
+    for lr, depth, leaf in itertools.product([0.03, 0.1], [3, None], [20, 100]):
+        kandidat.append(('Gradient Boosting', f'lr={lr}, depth={depth}, leaf={leaf}',
+                         pipa(HistGradientBoostingClassifier(learning_rate=lr, max_depth=depth, min_samples_leaf=leaf,
+                                                             max_iter=200, random_state=42), ANGKA_FINAL, skala=False)))
+    hasil = []
+    for nama, atur, m in kandidat:
+        m.fit(train_f[KOLOM_FINAL], y_train)
+        hasil.append({'model': nama, 'pengaturan': atur, 'objek': m, **nilai_ap(m.predict_proba(val_f[KOLOM_FINAL])[:, 1])})
+    tabel = pd.DataFrame(hasil).sort_values('PR-AUC val', ascending=False, kind='stable').reset_index(drop=True)
+    terbaik = tabel.iloc[0]
+    model_final = terbaik['objek']
+    nama_model = f"{terbaik['model']} ({terbaik['pengaturan']})"
+    proba_final = model_final.predict_proba(val_f[KOLOM_FINAL])[:, 1]
+
+    threshold = pilih_threshold(y_val, proba_final)
+    threshold_base = pilih_threshold(y_val, p_base)
+
+    keluaran = Path(keluaran)
+    keluaran.mkdir(parents=True, exist_ok=True)
+    joblib.dump(model_final, keluaran / 'model.joblib')
+    metadata = {
+        'nama_model': nama_model, 'tanggal_dilatih': str(date.today()),
+        'versi': {'python': platform.python_version(), 'scikit-learn': sklearn.__version__,
+                  'pandas': pd.__version__, 'numpy': np.__version__},
+        'sumber_data': 'https://github.com/nurhikam/mkb-ml-project/tree/main/kasus/08-keterlambatan-paket',
+        'sha256_data': SHA_DATA,
+        'baris': {'mentah': int(len(isi.splitlines()) - 1), 'unik': int(len(df)), 'train': int(len(train)),
+                  'validation': int(len(val)), 'test_disimpan_tidak_dievaluasi': int(len(test_mentah))},
+        'periode_train': '2025-01-01 s.d. 2025-12-31', 'periode_validation': '2026-01-01 s.d. 2026-03-31',
+        'fitur_angka': ANGKA_FINAL, 'fitur_kategori': FITUR_KATEGORI,
+        'threshold_kabari': threshold, 'threshold_prioritaskan': 0.50,
+        'biaya': {'terlewat_FN': BIAYA_FN, 'salah_kabar_FP': BIAYA_FP},
+        'patokan_cleaning': {'median_berat': float(patokan['median_berat']),
+                             'jarak_per_kota': {k: float(v) for k, v in patokan['jarak_per_kota'].items()}},
+        'metrik_validation': {'pr_auc_model': round(float(average_precision_score(y_val, proba_final)), 3),
+                              'pr_auc_baseline': round(float(average_precision_score(y_val, p_base)), 3),
+                              'pr_auc_acak': round(float(y_val.mean()), 3),
+                              'pr_auc_jan_feb_model': round(nilai_ap(proba_final)['PR-AUC Jan+Feb'], 3),
+                              'pr_auc_jan_feb_baseline': round(nilai_ap(p_base)['PR-AUC Jan+Feb'], 3),
+                              'biaya_model_rp': hitung_biaya(y_val, proba_final, threshold)['biaya (Rp)'],
+                              'biaya_baseline_rp': hitung_biaya(y_val, p_base, threshold_base)['biaya (Rp)'],
+                              'biaya_kabari_semua_rp': hitung_biaya(y_val, np.ones(len(y_val)), 0.5)['biaya (Rp)'],
+                              'konfusi_model': hitung_biaya(y_val, proba_final, threshold)},
+        'tabel_tuning': tabel.drop(columns='objek').round(4).to_dict('records'),
+        'evaluasi_test': 'belum dijalankan oleh train.py; lihat bagian 10 notebook (sekali saja)',
+    }
+    (keluaran / 'metadata.json').write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding='utf-8')
     return metadata
 
-if __name__=='__main__':
-    import argparse,json
-    from pathlib import Path
-    parser=argparse.ArgumentParser(); parser.add_argument('--finalize',action='store_true'); args=parser.parse_args()
-    print(json.dumps(build(Path(__file__).resolve().parent/'artifacts',args.finalize),indent=2))
 
+if __name__ == '__main__':
+    m = latih()
+    print(json.dumps(m['metrik_validation'], indent=2, ensure_ascii=False))
+    print('Model:', m['nama_model'], '| threshold:', m['threshold_kabari'])

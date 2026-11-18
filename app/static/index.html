@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prediksi Keterlambatan Paket</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1d2433; --muted:#667085; --line:#d9dee7; --accent:#2457c5;
+          --aman:#1f7a4d; --kabari:#b26b00; --prior:#b42318; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  main { max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font-size: 1.35rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: .92rem; }
+  form, .hasil { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+  label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 4px; }
+  label small { font-weight: 400; color: var(--muted); }
+  input, select { width: 100%; padding: 10px; font-size: 1rem; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  .tombol { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  button { padding: 11px 16px; font-size: .95rem; border-radius: 8px; border: 1px solid var(--line); background: #fff; cursor: pointer; }
+  button.utama { background: var(--accent); color: #fff; border-color: var(--accent); flex: 1 1 100%; font-weight: 600; }
+  .hasil { margin-top: 16px; display: none; }
+  .label { display: inline-block; padding: 6px 12px; border-radius: 999px; color: #fff; font-weight: 700; }
+  .AMAN { background: var(--aman); } .KABARI { background: var(--kabari); } .PRIORITASKAN { background: var(--prior); }
+  .angka { font-size: 2rem; font-weight: 700; margin: 10px 0 4px; }
+  .bar { height: 10px; background: #eceff3; border-radius: 6px; overflow: hidden; }
+  .bar span { display: block; height: 100%; background: var(--accent); }
+  .err { border-color: var(--prior); }
+  .err ul { margin: 8px 0 0; padding-left: 20px; }
+  .kecil { color: var(--muted); font-size: .85rem; }
+  footer { margin-top: 18px; color: var(--muted); font-size: .8rem; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Prediksi Keterlambatan Paket</h1>
+  <p class="sub">Hub Bandung · isi data paket saat dijemput. Kasus 08, Bob &amp; Riyu (MKB 5B). Data sintetis.</p>
+
+  <form id="form">
+    <div class="grid">
+      <div><label for="kota_tujuan">Kota tujuan</label><select id="kota_tujuan" required></select></div>
+      <div><label for="layanan">Layanan</label>
+        <select id="layanan"><option>EXPRESS</option><option selected>REG</option><option>HEMAT</option></select></div>
+      <div><label for="jam_pickup">Jam pickup <small>(7–22)</small></label><input id="jam_pickup" type="number" value="10"></div>
+      <div><label for="janji_hari">Janji tiba <small>(hari)</small></label><input id="janji_hari" type="number" value="2"></div>
+      <div><label for="jumlah_transit">Jumlah transit</label><input id="jumlah_transit" type="number" value="1"></div>
+      <div><label for="jarak_km">Jarak (km) <small>boleh kosong</small></label><input id="jarak_km" type="number" step="any" value="150"></div>
+      <div><label for="berat_kg">Berat (kg) <small>boleh kosong</small></label><input id="berat_kg" type="number" step="any" value="2"></div>
+      <div><label for="metode_bayar">Pembayaran</label>
+        <select id="metode_bayar"><option value="non_COD">non-COD</option><option value="COD">COD</option></select></div>
+      <div><label for="cuaca_saat_pickup">Cuaca saat pickup</label>
+        <select id="cuaca_saat_pickup"><option>cerah</option><option>berawan</option><option>hujan</option>
+          <option value="hujan_lebat">hujan lebat</option><option value="">tidak diketahui</option></select></div>
+      <div><label for="volume_hub_kemarin">Volume hub kemarin <small>boleh kosong</small></label>
+        <input id="volume_hub_kemarin" type="number" value="5300"></div>
+    </div>
+    <div class="tombol">
+      <button type="submit" class="utama">Prediksi</button>
+      <button type="button" data-contoh="aman">Contoh: risiko rendah</button>
+      <button type="button" data-contoh="tinggi">Contoh: risiko tinggi</button>
+      <button type="button" data-contoh="aneh">Contoh: input tidak wajar</button>
+    </div>
+  </form>
+
+  <section class="hasil" id="hasil" aria-live="polite"></section>
+
+  <footer>Rekomendasi: di bawah threshold → aman · threshold sampai 0,50 → kabari pelanggan · ≥ 0,50 → prioritaskan.
+    <br>API: <a href="/docs">/docs</a> · <a href="/health">/health</a></footer>
+</main>
+<script>
+const KOTA = ['Balikpapan','Bekasi','Bogor','Cirebon','Denpasar','Jakarta','Makassar','Malang','Medan',
+              'Palembang','Pontianak','Semarang','Surabaya','Tasikmalaya','Yogyakarta'];
+const sel = document.getElementById('kota_tujuan');
+KOTA.forEach(k => sel.add(new Option(k, k, false, k === 'Jakarta')));
+
+const ANGKA = ['jam_pickup','janji_hari','jumlah_transit','jarak_km','berat_kg','volume_hub_kemarin'];
+const BULAT = ['jam_pickup','janji_hari','jumlah_transit','volume_hub_kemarin'];
+const CONTOH = {
+  aman:   {kota_tujuan:'Cirebon', layanan:'HEMAT', jam_pickup:9, janji_hari:5, jumlah_transit:1, jarak_km:130,
+           berat_kg:1.5, metode_bayar:'non_COD', cuaca_saat_pickup:'cerah', volume_hub_kemarin:5000},
+  tinggi: {kota_tujuan:'Makassar', layanan:'EXPRESS', jam_pickup:20, janji_hari:2, jumlah_transit:4, jarak_km:1500,
+           berat_kg:3, metode_bayar:'COD', cuaca_saat_pickup:'hujan_lebat', volume_hub_kemarin:11000},
+  aneh:   {kota_tujuan:'Jakarta', layanan:'REG', jam_pickup:25, janji_hari:2, jumlah_transit:1, jarak_km:150,
+           berat_kg:-1, metode_bayar:'COD', cuaca_saat_pickup:'cerah', volume_hub_kemarin:5300},
+};
+document.querySelectorAll('[data-contoh]').forEach(b => b.onclick = () => {
+  const c = CONTOH[b.dataset.contoh];
+  Object.entries(c).forEach(([k, v]) => document.getElementById(k).value = v);
+  kirim();
+});
+
+const NAMA = {jam_pickup:'Jam pickup', janji_hari:'Janji tiba', jumlah_transit:'Jumlah transit', jarak_km:'Jarak',
+              berat_kg:'Berat', volume_hub_kemarin:'Volume hub kemarin', kota_tujuan:'Kota tujuan', layanan:'Layanan',
+              metode_bayar:'Pembayaran', cuaca_saat_pickup:'Cuaca'};
+const hasil = document.getElementById('hasil');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function bacaForm() {
+  const data = {};
+  ['kota_tujuan','layanan','metode_bayar','cuaca_saat_pickup', ...ANGKA].forEach(k => {
+    const v = document.getElementById(k).value.trim();
+    if (v === '') data[k] = null;
+    else if (ANGKA.includes(k)) data[k] = BULAT.includes(k) && Number.isInteger(Number(v)) ? parseInt(v, 10) : Number(v);
+    else data[k] = v;
+  });
+  return data;
+}
+
+async function kirim(e) {
+  if (e) e.preventDefault();
+  hasil.style.display = 'block'; hasil.className = 'hasil'; hasil.textContent = 'Menghitung…';
+  try {
+    const r = await fetch('/predict', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(bacaForm())});
+    const j = await r.json();
+    if (r.ok) {
+      const kelas = j.rekomendasi.split(' ')[0];
+      const p = (j.probabilitas_terlambat * 100).toFixed(1).replace('.', ',');
+      hasil.innerHTML = `<span class="label ${kelas}">${esc(j.rekomendasi)}</span>
+        <div class="angka">${p}%</div><div class="kecil">peluang paket terlambat</div>
+        <div class="bar"><span style="width:${Math.min(100, j.probabilitas_terlambat * 100)}%"></span></div>
+        <p>${esc(j.saran)}</p>
+        ${j.diisi_otomatis.length ? `<p class="kecil">Diisi otomatis dari data train: ${j.diisi_otomatis.map(k => esc(NAMA[k] || k)).join(', ')}</p>` : ''}
+        <p class="kecil">${esc(j.model)} · threshold kabari ${j.threshold_kabari}</p>`;
+    } else {
+      const daftar = (j.detail || []).map(d => `<li><b>${esc(NAMA[d.loc?.[1]] || d.loc?.[1] || 'input')}</b>: ${esc(d.msg)}</li>`).join('');
+      hasil.className = 'hasil err';
+      hasil.innerHTML = `<b>Input belum valid (kode ${r.status}).</b> Tidak ada prediksi yang dibuat.<ul>${daftar}</ul>`;
+    }
+  } catch (err) {
+    hasil.className = 'hasil err'; hasil.textContent = 'Gagal menghubungi server: ' + err;
+  }
+}
+document.getElementById('form').addEventListener('submit', kirim);
+</script>
+</body>
+</html>
