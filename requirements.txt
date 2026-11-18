@@ -7,6 +7,3 @@ pydantic==2.13.5
 # aplikasi
 fastapi==0.133.1
 uvicorn==0.54.0
-# test dan notebook
-httpx==0.28.1
-matplotlib==3.11.2

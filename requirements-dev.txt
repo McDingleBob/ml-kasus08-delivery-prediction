@@ -1,0 +1,4 @@
+# untuk test dan notebook
+-r requirements.txt
+httpx==0.28.1
+matplotlib==3.11.2

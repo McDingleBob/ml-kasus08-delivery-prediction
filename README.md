@@ -60,7 +60,7 @@ Di test (tanpa musim sibuk, keterlambatan 13,9%), PR-AUC model final hampir sama
 ## Menjalankan
 
 ```sh
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 python -m unittest discover -s tests -v       # test
 python train.py                               # melatih ulang (hasil sama dengan notebook)
 uvicorn app.api.main:app --host 0.0.0.0 --port 7860

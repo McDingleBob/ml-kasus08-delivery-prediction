@@ -7,7 +7,7 @@ GET /docs    dokumentasi interaktif (Swagger)
 GET /health  status dan info model
 POST /predict
 """
-from contextlib import asynccontextmanager
+from functools import lru_cache
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -16,17 +16,15 @@ from fastapi.responses import FileResponse
 from app.core import KOTA, Paket, Prediktor
 
 STATIC = Path(__file__).resolve().parents[1] / 'static'
-state = {}
 
 
-@asynccontextmanager
-async def lifespan(app):
-    state['prediktor'] = Prediktor()
-    yield
-    state.clear()
+@lru_cache(maxsize=1)
+def prediktor() -> Prediktor:
+    """Model dimuat sekali saat pertama dibutuhkan (cocok untuk server biasa maupun serverless)."""
+    return Prediktor()
 
 
-app = FastAPI(title='Prediksi Keterlambatan Paket · Kasus 08', version='1.0.0', lifespan=lifespan,
+app = FastAPI(title='Prediksi Keterlambatan Paket · Kasus 08', version='1.0.0',
               description='Bob & Riyu (MKB 5B). Masukkan data paket saat pickup; keluaran berupa probabilitas '
                           'terlambat dan rekomendasi. Data sintetis, bukan sistem operasional.')
 
@@ -38,7 +36,7 @@ def halaman():
 
 @app.get('/health')
 def health():
-    m = state['prediktor'].meta
+    m = prediktor().meta
     return {'status': 'ok', 'model': m['nama_model'], 'threshold_kabari': m['threshold_kabari'],
             'threshold_prioritaskan': m['threshold_prioritaskan'], 'fitur_angka': m['fitur_angka'],
             'fitur_kategori': m['fitur_kategori'], 'kota': KOTA, 'data_sintetis': True}
@@ -46,4 +44,4 @@ def health():
 
 @app.post('/predict')
 def predict(paket: Paket):
-    return state['prediktor'].prediksi(paket)
+    return prediktor().prediksi(paket)
