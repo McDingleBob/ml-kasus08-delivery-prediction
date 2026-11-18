@@ -7,7 +7,7 @@ Brief dan data: [nurhikam/mkb-ml-project · kasus 08](https://github.com/nurhika
 
 | Tautan | |
 |---|---|
-| Aplikasi | _belum ada (isi setelah deploy)_ |
+| Aplikasi | https://ml-kasus08-delivery-prediction.vercel.app (form) · [/docs](https://ml-kasus08-delivery-prediction.vercel.app/docs) (API) |
 | Notebook Colab | _isi tautan Colab_ |
 | Video | _isi tautan video_ |
 
@@ -66,7 +66,7 @@ python train.py                               # melatih ulang (hasil sama dengan
 uvicorn app.api.main:app --host 0.0.0.0 --port 7860
 ```
 
-Buka `http://localhost:7860` untuk form, `/docs` untuk dokumentasi API, `/health` untuk status. Docker: `docker build -t kasus08 . && docker run -p 7860:7860 kasus08`.
+Versi online di-deploy di Vercel (gratis, otomatis diperbarui setiap push ke `main`). Lokal: buka `http://localhost:7860` untuk form, `/docs` untuk dokumentasi API, `/health` untuk status. Docker: `docker build -t kasus08 . && docker run -p 7860:7860 kasus08`.
 
 Contoh `POST /predict`:
 ```json
