@@ -37,7 +37,7 @@ def halaman():
 @app.get('/health')
 def health():
     m = prediktor().meta
-    return {'status': 'ok', 'model': m['nama_model'], 'threshold_kabari': m['threshold_kabari'],
+    return {'status': 'ok', 'versi_model': m['versi_model'], 'model': m['nama_model'], 'threshold_kabari': m['threshold_kabari'],
             'threshold_prioritaskan': m['threshold_prioritaskan'], 'fitur_angka': m['fitur_angka'],
             'fitur_kategori': m['fitur_kategori'], 'kota': KOTA, 'data_sintetis': True}
 

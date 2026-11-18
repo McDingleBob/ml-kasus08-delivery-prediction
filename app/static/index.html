@@ -109,6 +109,14 @@ function bacaForm() {
   return data;
 }
 
+function pesan(d) {
+  const c = d.ctx || {};
+  return ({missing: 'wajib diisi', int_type: 'harus bilangan bulat', int_parsing: 'harus bilangan bulat',
+    int_from_float: 'harus bilangan bulat', float_type: 'harus angka', float_parsing: 'harus angka',
+    less_than_equal: `maksimal ${c.le}`, greater_than_equal: `minimal ${c.ge}`, greater_than: `harus lebih dari ${c.gt}`,
+    literal_error: 'pilihan tidak dikenal', finite_number: 'harus angka biasa', extra_forbidden: 'kolom tidak dikenal'}[d.type]) || d.msg;
+}
+
 async function kirim(e) {
   if (e) e.preventDefault();
   hasil.style.display = 'block'; hasil.className = 'hasil'; hasil.textContent = 'Menghitung…';
@@ -123,9 +131,9 @@ async function kirim(e) {
         <div class="bar"><span style="width:${Math.min(100, j.probabilitas_terlambat * 100)}%"></span></div>
         <p>${esc(j.saran)}</p>
         ${j.diisi_otomatis.length ? `<p class="kecil">Diisi otomatis dari data train: ${j.diisi_otomatis.map(k => esc(NAMA[k] || k)).join(', ')}</p>` : ''}
-        <p class="kecil">${esc(j.model)} · threshold kabari ${j.threshold_kabari}</p>`;
+        <p class="kecil">${esc(j.model)} v${esc(j.versi_model)} · threshold kabari ${j.threshold_kabari}</p>`;
     } else {
-      const daftar = (j.detail || []).map(d => `<li><b>${esc(NAMA[d.loc?.[1]] || d.loc?.[1] || 'input')}</b>: ${esc(d.msg)}</li>`).join('');
+      const daftar = (j.detail || []).map(d => `<li><b>${esc(NAMA[d.loc?.[1]] || d.loc?.[1] || 'input')}</b>: ${esc(pesan(d))}</li>`).join('');
       hasil.className = 'hasil err';
       hasil.innerHTML = `<b>Input belum valid (kode ${r.status}).</b> Tidak ada prediksi yang dibuat.<ul>${daftar}</ul>`;
     }

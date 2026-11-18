@@ -37,7 +37,7 @@ class Paket(BaseModel):
 
 
 class Prediktor:
-    def __init__(self, folder=ROOT / 'models'):
+    def __init__(self, folder=ROOT / 'artifacts'):
         self.meta = json.loads((Path(folder) / 'metadata.json').read_text(encoding='utf-8'))
         self.model = joblib.load(Path(folder) / 'model.joblib')
         self.patokan = self.meta['patokan_cleaning']
@@ -60,5 +60,5 @@ class Prediktor:
             rekomendasi, saran = 'AMAN', 'Risiko rendah. Bukan jaminan paket tepat waktu.'
         return {'probabilitas_terlambat': round(p, 4), 'rekomendasi': rekomendasi, 'saran': saran,
                 'threshold_kabari': t_kabari, 'threshold_prioritaskan': t_prior,
-                'diisi_otomatis': kosong, 'model': self.meta['nama_model'],
+                'diisi_otomatis': kosong, 'model': self.meta['nama_model'], 'versi_model': self.meta['versi_model'],
                 'catatan': 'Demo pembelajaran dengan data sintetis.'}

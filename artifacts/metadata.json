@@ -1,11 +1,13 @@
 {
+  "versi_model": "1.0.0",
   "nama_model": "Regresi logistik (C=0.1)",
   "tanggal_dilatih": "2026-11-18",
-  "versi": {
+  "versi_library": {
     "python": "3.13.18",
     "scikit-learn": "1.9.1",
     "pandas": "3.0.5",
-    "numpy": "2.5.3"
+    "numpy": "2.5.3",
+    "joblib": "1.6.0"
   },
   "sumber_data": "https://github.com/nurhikam/mkb-ml-project/tree/main/kasus/08-keterlambatan-paket",
   "sha256_data": "2821b50eac1b02181cacbfb52fca784b2b5be930c73e5c671a877eeec6a600ab",
@@ -148,5 +150,14 @@
       "PR-AUC Jan+Feb": 0.3767
     }
   ],
-  "evaluasi_test": "belum dijalankan oleh train.py; lihat bagian 10 notebook (sekali saja)"
+  "metrik_test": {
+    "tanggal_evaluasi": "2026-11-18",
+    "pr_auc_model": 0.362,
+    "pr_auc_baseline": 0.36,
+    "pr_auc_acak": 0.139,
+    "biaya_model_rp": 23425000,
+    "biaya_kabari_semua_rp": 29025000,
+    "recall_model": 0.801,
+    "sumber": "hasil_test.json (evaluasi satu kali)"
+  }
 }

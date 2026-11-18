@@ -46,7 +46,7 @@ class TrainingTests(unittest.TestCase):
         self.assertEqual(meta['metrik_validation']['biaya_model_rp'], 20_730_000)
 
     def test_metadata_repo_konsisten(self):
-        meta = json.loads((ROOT / 'models' / 'metadata.json').read_text(encoding='utf-8'))
+        meta = json.loads((ROOT / 'artifacts' / 'metadata.json').read_text(encoding='utf-8'))
         self.assertEqual(meta['nama_model'], 'Regresi logistik (C=0.1)')
         self.assertEqual(meta['threshold_kabari'], 0.1)
 

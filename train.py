@@ -31,6 +31,7 @@ from src.features import (ANGKA_FINAL, FITUR_ASLI_ANGKA, FITUR_KATEGORI, KOLOM_F
 ROOT = Path(__file__).resolve().parent
 SHA_DATA = '2821b50eac1b02181cacbfb52fca784b2b5be930c73e5c671a877eeec6a600ab'
 BIAYA_FN, BIAYA_FP = 50_000, 5_000
+VERSI_MODEL = '1.0.0'
 BATAS_TEST, BATAS_VAL = '2026-04-01', '2026-01-01'
 
 
@@ -66,7 +67,7 @@ def pilih_threshold(y, proba):
     return float(kurva.loc[kurva['biaya (Rp)'].idxmin(), 'threshold'])
 
 
-def latih(sumber=ROOT / 'data' / 'raw.csv', keluaran=ROOT / 'models'):
+def latih(sumber=ROOT / 'data' / 'raw.csv', keluaran=ROOT / 'artifacts'):
     isi = Path(sumber).read_bytes()
     assert hashlib.sha256(isi).hexdigest() == SHA_DATA, 'Dataset berbeda!'
     df, kerja, test_mentah = pisah_waktu(pd.read_csv(sumber))
@@ -116,9 +117,9 @@ def latih(sumber=ROOT / 'data' / 'raw.csv', keluaran=ROOT / 'models'):
     keluaran.mkdir(parents=True, exist_ok=True)
     joblib.dump(model_final, keluaran / 'model.joblib')
     metadata = {
-        'nama_model': nama_model, 'tanggal_dilatih': str(date.today()),
-        'versi': {'python': platform.python_version(), 'scikit-learn': sklearn.__version__,
-                  'pandas': pd.__version__, 'numpy': np.__version__},
+        'versi_model': VERSI_MODEL, 'nama_model': nama_model, 'tanggal_dilatih': str(date.today()),
+        'versi_library': {'python': platform.python_version(), 'scikit-learn': sklearn.__version__,
+                  'pandas': pd.__version__, 'numpy': np.__version__, 'joblib': joblib.__version__},
         'sumber_data': 'https://github.com/nurhikam/mkb-ml-project/tree/main/kasus/08-keterlambatan-paket',
         'sha256_data': SHA_DATA,
         'baris': {'mentah': int(len(isi.splitlines()) - 1), 'unik': int(len(df)), 'train': int(len(train)),
@@ -139,8 +140,21 @@ def latih(sumber=ROOT / 'data' / 'raw.csv', keluaran=ROOT / 'models'):
                               'biaya_kabari_semua_rp': hitung_biaya(y_val, np.ones(len(y_val)), 0.5)['biaya (Rp)'],
                               'konfusi_model': hitung_biaya(y_val, proba_final, threshold)},
         'tabel_tuning': tabel.drop(columns='objek').round(4).to_dict('records'),
-        'evaluasi_test': 'belum dijalankan oleh train.py; lihat bagian 10 notebook (sekali saja)',
     }
+    # Hasil test TIDAK dihitung di sini; jika sudah pernah dievaluasi (notebook bagian 10), hasilnya disalin apa adanya.
+    hasil_test = keluaran / 'hasil_test.json'
+    if hasil_test.exists():
+        t = json.loads(hasil_test.read_text(encoding='utf-8'))
+        metadata['metrik_test'] = {'tanggal_evaluasi': t['tanggal_evaluasi'],
+                                   'pr_auc_model': round(t['hasil']['Model final']['PR-AUC'], 3),
+                                   'pr_auc_baseline': round(t['hasil']['Baseline (LR fitur asli)']['PR-AUC'], 3),
+                                   'pr_auc_acak': t['proporsi_terlambat'],
+                                   'biaya_model_rp': t['hasil']['Model final']['biaya (Rp)'],
+                                   'biaya_kabari_semua_rp': t['hasil']['Kabari semua paket']['biaya (Rp)'],
+                                   'recall_model': round(t['hasil']['Model final']['recall'], 3),
+                                   'sumber': 'hasil_test.json (evaluasi satu kali)'}
+    else:
+        metadata['metrik_test'] = 'belum dievaluasi; lihat bagian 10 notebook (sekali saja)'
     (keluaran / 'metadata.json').write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding='utf-8')
     return metadata
 
