@@ -6,7 +6,7 @@
 
 | Anggota | NIM | Bagian yang dikerjakan |
 |---|---|---|
-| Bob Nolen Barnabas Munthe | 2406157 | Repositori; pembersihan data awal (duplikat, ejaan kota dan layanan, berat tidak valid, `volume_hub_hari` tidak dipakai) dan split waktu; EDA awal (distribusi kelas, jarak, layanan); *baseline* regresi logistik, model awal (HGB), dan *threshold* berbasis biaya versi awal; `src/features.py` + `train.py` (pelatihan ulang); API FastAPI dan halaman aplikasi, validasi masukan, deploy Vercel; evaluasi *test*; README dan diagram arsitektur |
+| Bob Nolen Barnabas Munthe | 2406157 | Repositori, pembersihan data awal (duplikat, ejaan kota dan layanan, berat tidak valid, `volume_hub_hari` tidak dipakai) dan split waktu, EDA awal (distribusi kelas, jarak, layanan), *baseline* regresi logistik, model awal (HGB), dan *threshold* berbasis biaya versi awal, `src/features.py` + `train.py` (pelatihan ulang), API FastAPI dan halaman aplikasi, validasi masukan, deploy Vercel, evaluasi *test*, README dan diagram arsitektur |
 | Muhammad Riyu Saputra | 2403287 | *Notebook* final: pembersihan data lanjutan (berat dalam gram), EDA lanjutan (transit, musim sibuk, layanan × janji), fitur buatan (volume kemarin, kelonggaran janji, pickup malam), perbandingan model final, *tuning*, dan pemilihan *threshold* final |
 
 ## Arsitektur
