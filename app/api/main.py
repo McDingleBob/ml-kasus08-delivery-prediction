@@ -4,6 +4,7 @@
 
 GET /        halaman form (bisa dibuka dari ponsel)
 GET /docs    dokumentasi interaktif (Swagger)
+GET /arsitektur  diagram arsitektur
 GET /health  status dan info model
 POST /predict
 """
@@ -32,6 +33,16 @@ app = FastAPI(title='Prediksi Keterlambatan Paket · Kasus 08', version='1.0.0',
 @app.get('/', include_in_schema=False)
 def halaman():
     return FileResponse(STATIC / 'index.html')
+
+
+@app.get('/arsitektur', include_in_schema=False)
+def arsitektur():
+    return FileResponse(STATIC / 'arsitektur.html')
+
+
+@app.get('/arsitektur.svg', include_in_schema=False)
+def arsitektur_svg():
+    return FileResponse(STATIC / 'arsitektur.svg', media_type='image/svg+xml')
 
 
 @app.get('/health')

@@ -74,6 +74,8 @@ class ApiTests(unittest.TestCase):
         with TestClient(app) as c:
             self.assertEqual(c.get('/health').status_code, 200)
             self.assertIn('Prediksi', c.get('/').text)
+            self.assertEqual(c.get('/arsitektur').status_code, 200)
+            self.assertEqual(c.get('/arsitektur.svg').headers['content-type'], 'image/svg+xml')
             self.assertEqual(c.post('/predict', json=VALID).status_code, 200)
             for kolom, nilai in TIDAK_WAJAR[:-1]:
                 self.assertEqual(c.post('/predict', json={**VALID, kolom: nilai}).status_code, 422, kolom)
