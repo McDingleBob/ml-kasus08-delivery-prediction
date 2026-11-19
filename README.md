@@ -6,8 +6,8 @@
 
 | Anggota | NIM | Bagian yang dikerjakan |
 |---|---|---|
-| Bob Nolen Barnabas Munthe | 2406157 | _[diisi Bob sesuai pekerjaan nyata]_ |
-| Muhammad Riyu Saputra | 2403287 | _[diisi Riyu sesuai pekerjaan nyata]_ |
+| Bob Nolen Barnabas Munthe | 2406157 | Repositori dan pipeline awal, `src/features.py` + `train.py` (pelatihan ulang), API FastAPI dan halaman aplikasi, validasi masukan, deploy Vercel, evaluasi *test*, README dan diagram arsitektur |
+| Muhammad Riyu Saputra | 2403287 | *Notebook* final: pembersihan data (ejaan, berat gram), EDA, fitur buatan (volume kemarin, kelonggaran janji, pickup malam), perbandingan model, *tuning*, dan pemilihan *threshold* |
 
 ## Arsitektur
 
