@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 760" width="1600" height="760" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="panah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475467"/>
+    </marker>
+  </defs>
+  <rect width="1600" height="760" fill="#ffffff"/>
+
+  <text x="60" y="62" font-size="34" font-weight="700" fill="#101828">Arsitektur: data → model → API → aplikasi</text>
+  <text x="60" y="98" font-size="20" fill="#475467">Kasus 08 · Prediksi keterlambatan paket · Bob &amp; Riyu (MKB 5B)</text>
+
+  <!-- Baris 1: pelatihan -->
+  <rect x="40" y="130" width="1520" height="250" rx="18" fill="#f2f6fc" stroke="#c7d7f0"/>
+  <text x="70" y="168" font-size="20" font-weight="700" fill="#2457c5">1 · PELATIHAN (notebook / train.py, sekali di awal)</text>
+
+  <g font-size="19" fill="#101828">
+    <rect x="70" y="190" width="300" height="160" rx="12" fill="#fff" stroke="#98a2b3" stroke-width="2"/>
+    <text x="90" y="226" font-weight="700" font-size="22">data/raw.csv</text>
+    <text x="90" y="260">40.500 baris paket</text>
+    <text x="90" y="288">Jan 2025 – Jun 2026</text>
+    <text x="90" y="316" fill="#475467">split waktu: train · val · test</text>
+
+    <rect x="440" y="190" width="320" height="160" rx="12" fill="#fff" stroke="#98a2b3" stroke-width="2"/>
+    <text x="460" y="226" font-weight="700" font-size="22">src/features.py</text>
+    <text x="460" y="260">rapikan ejaan, berat gram→kg</text>
+    <text x="460" y="288">isi kosong (patokan train)</text>
+    <text x="460" y="316">fitur: volume kemarin, dll.</text>
+
+    <rect x="830" y="190" width="320" height="160" rx="12" fill="#fff" stroke="#98a2b3" stroke-width="2"/>
+    <text x="850" y="226" font-weight="700" font-size="22">Model + threshold</text>
+    <text x="850" y="260">baseline vs regresi logistik</text>
+    <text x="850" y="288">pilih PR-AUC validation</text>
+    <text x="850" y="316">threshold 0,10 (biaya min.)</text>
+
+    <rect x="1220" y="190" width="310" height="160" rx="12" fill="#eaf1ff" stroke="#2457c5" stroke-width="2.5"/>
+    <text x="1240" y="226" font-weight="700" font-size="22">artifacts/</text>
+    <text x="1240" y="260">model.joblib</text>
+    <text x="1240" y="288">metadata.json</text>
+    <text x="1240" y="316" fill="#475467">versi, fitur, threshold, metrik</text>
+  </g>
+  <g stroke="#475467" stroke-width="3" marker-end="url(#panah)">
+    <line x1="372" y1="270" x2="436" y2="270"/>
+    <line x1="762" y1="270" x2="826" y2="270"/>
+    <line x1="1152" y1="270" x2="1216" y2="270"/>
+  </g>
+
+  <!-- Baris 2: aplikasi -->
+  <rect x="40" y="420" width="1520" height="300" rx="18" fill="#f3faf6" stroke="#bfe3cf"/>
+  <text x="70" y="458" font-size="20" font-weight="700" fill="#1f7a4d">2 · APLIKASI ONLINE (Vercel, setiap prediksi)</text>
+
+  <g font-size="19" fill="#101828">
+    <rect x="70" y="480" width="300" height="200" rx="12" fill="#fff" stroke="#98a2b3" stroke-width="2"/>
+    <text x="90" y="516" font-weight="700" font-size="22">Staf CS / operasional</text>
+    <text x="90" y="550">halaman form di laptop/HP</text>
+    <text x="90" y="578">isi data paket saat pickup</text>
+    <text x="90" y="606" fill="#475467">ml-kasus08-delivery-</text>
+    <text x="90" y="630" fill="#475467">prediction.vercel.app</text>
+
+    <rect x="500" y="480" width="560" height="200" rx="12" fill="#fff" stroke="#1f7a4d" stroke-width="2.5"/>
+    <text x="520" y="516" font-weight="700" font-size="22">FastAPI · POST /predict</text>
+    <text x="520" y="552">① cek input wajar (Pydantic) → kalau tidak: 422 + pesan</text>
+    <text x="520" y="584">② src/features.py yang sama dengan pelatihan</text>
+    <text x="520" y="616">③ model.joblib → probabilitas terlambat</text>
+    <text x="520" y="648">④ bandingkan threshold → rekomendasi</text>
+
+    <rect x="1190" y="480" width="340" height="200" rx="12" fill="#fff" stroke="#98a2b3" stroke-width="2"/>
+    <text x="1210" y="516" font-weight="700" font-size="22">Rekomendasi</text>
+    <rect x="1210" y="534" width="300" height="38" rx="19" fill="#1f7a4d"/>
+    <text x="1360" y="560" text-anchor="middle" fill="#fff" font-weight="700">AMAN  (&lt; 0,10)</text>
+    <rect x="1210" y="582" width="300" height="38" rx="19" fill="#b26b00"/>
+    <text x="1360" y="608" text-anchor="middle" fill="#fff" font-weight="700">KABARI  (0,10 – 0,50)</text>
+    <rect x="1210" y="630" width="300" height="38" rx="19" fill="#b42318"/>
+    <text x="1360" y="656" text-anchor="middle" fill="#fff" font-weight="700">PRIORITASKAN  (≥ 0,50)</text>
+  </g>
+  <g stroke="#475467" stroke-width="3" fill="none">
+    <line x1="372" y1="560" x2="496" y2="560" marker-end="url(#panah)"/>
+    <line x1="496" y1="610" x2="372" y2="610" marker-end="url(#panah)"/>
+    <line x1="1062" y1="580" x2="1186" y2="580" marker-end="url(#panah)"/>
+  </g>
+  <text x="385" y="548" font-size="16" fill="#475467">data paket</text>
+  <text x="385" y="634" font-size="16" fill="#475467">hasil (JSON)</text>
+  <text x="520" y="704" font-size="16" fill="#475467">Juga tersedia /docs (dokumentasi API) dan /health (info model). Tanpa database: tidak ada data yang disimpan.</text>
+  <!-- penghubung: push ke GitHub, deploy Vercel -->
+  <path d="M1375,352 L1375,400 L900,400 L900,474" stroke="#475467" stroke-width="3" fill="none" marker-end="url(#panah)"/>
+  <rect x="930" y="386" width="420" height="28" fill="#ffffff"/>
+  <text x="1140" y="407" font-size="18" fill="#475467" text-anchor="middle">git push → GitHub → Vercel deploy otomatis</text>
+
+</svg>

@@ -9,6 +9,10 @@
 | Bob Nolen Barnabas Munthe | 2406157 | _[diisi Bob sesuai pekerjaan nyata]_ |
 | Muhammad Riyu Saputra | 2403287 | _[diisi Riyu sesuai pekerjaan nyata]_ |
 
+## Arsitektur
+
+![Arsitektur: data → model → API → aplikasi](docs/arsitektur.svg)
+
 ## Masalah dan pengguna
 
 Kepala operasional hub ekspedisi di Bandung ingin tahu, **saat paket dijemput**, paket mana yang kemungkinan terlambat. Penggunanya staf layanan pelanggan dan operasional hub: aplikasi memberi probabilitas terlambat dan rekomendasi **aman**, **kabari pelanggan**, atau **prioritaskan**, supaya pelanggan bisa dikabari lebih awal. Brief: [nurhikam/mkb-ml-project · kasus 08](https://github.com/nurhikam/mkb-ml-project/tree/main/kasus/08-keterlambatan-paket). Data sintetis.
@@ -78,6 +82,7 @@ train.py                          melatih ulang model final dari data (tanpa mem
 artifacts/                        model.joblib + metadata.json (versi, fitur, threshold, metrik) + hasil_test.json
 app/                              API FastAPI (app/api/main.py) dan halaman aplikasi (app/static/index.html)
 tests/                            unit test cleaning, fitur, pelatihan, dan validasi masukan
+docs/                             diagram arsitektur (svg + png)
 ```
 
 ## Keterbatasan
