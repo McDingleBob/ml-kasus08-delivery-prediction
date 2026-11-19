@@ -1,6 +1,6 @@
 # Prediksi Keterlambatan Paket · Tim Bob & Riyu (MKB 5B)
 
-**Kasus:** 08 · Keterlambatan Paket · **Aplikasi:** https://ml-kasus08-delivery-prediction.vercel.app · **Video:** _[tautan video]_
+**Kasus:** 08 · Keterlambatan Paket · **Aplikasi:** https://ml-kasus08-delivery-prediction.vercel.app · **Video:** https://drive.google.com/file/d/1Nd2kPp8U1M0PHLtgAmsIAXw5V4yOuxHS/view?usp=sharing
 
 [![Buka di Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/McDingleBob/ml-kasus08-delivery-prediction/blob/main/notebooks/ML_Kasus08_Final.ipynb)
 
@@ -104,4 +104,4 @@ docs/                             diagram arsitektur (svg + png)
 - [x] `artifacts/metadata.json` berisi versi model, fitur masukan, *threshold*, dan metrik
 - [x] Aplikasi dapat dibuka orang lain melalui tautan, termasuk dari ponsel
 - [x] Aplikasi tidak berhenti mendadak ketika menerima masukan yang tidak wajar
-- [ ] Laporan paling banyak 6 halaman dan video paling lama 5 menit
+- [x] Laporan paling banyak 6 halaman dan video paling lama 5 menit
