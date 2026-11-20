@@ -34,6 +34,45 @@ Kepala operasional hub ekspedisi di Bandung ingin tahu, **saat paket dijemput**,
 
 Tidak ada baris yang dibuang selain duplikat. Semua patokan pengisian dihitung dari train saja.
 
+## 📊 Temuan EDA (train 2025)
+
+> **Data:** hanya train, Jan–Des 2025 · **26.633 paket** · **17,8% terlambat**
+> **Buat ulang grafik:** `python scripts/grafik_eda.py`
+
+### Ringkasan
+
+| | Temuan | Angka kunci | Jadi fitur |
+|:-:|---|---|---|
+| 🚚 | Makin banyak transit, makin sering terlambat | 10,8% (1 transit) → **44,9%** (5 transit) | — |
+| 📅 | Musim sibuk mendorong keterlambatan | Maret **±36%**, Nov–Des **±22%** | `volume_hub_kemarin`, `volume_kemarin_tinggi` |
+| ⏳ | Janji yang mepet lebih sering meleset | turun rapi seiring kelonggaran janji | `kelonggaran_janji` |
+| 🌙 | Pickup malam (18–22) lebih berisiko | **26,7%** | `pickup_malam` |
+
+### 1. Faktor keterlambatan
+
+![Proporsi terlambat menurut faktor](docs/eda/faktor_keterlambatan.png)
+
+- **Jumlah transit dan jarak** paling berpengaruh: 10,8% terlambat untuk 1 transit, naik ke 44,9% untuk 5 transit.
+- **Hujan lebat** (30,6%) dan **pickup malam 18–22** (26,7%) lebih sering terlambat.
+- **Berat paket tidak berpengaruh** (semua kelompok ±18%).
+- **EXPRESS** paling sering terlambat (25,5%), bukan karena lebih lambat, tetapi karena janjinya paling ketat.
+
+### 2. Musim sibuk
+
+![Musim sibuk](docs/eda/musim_sibuk.png)
+
+Keterlambatan melonjak pada **Maret (±36%)** dan **November–Desember (±22%)**, selalu bersamaan dengan lonjakan volume hub.
+
+> 💡 Total volume hari itu belum diketahui saat pickup, jadi fitur yang dipakai adalah **volume hub kemarin**.
+
+### 3. Kelonggaran janji
+
+![Kelonggaran janji](docs/eda/kelonggaran_janji.png)
+
+`janji_hari` sendirian tidak membentuk pola, tetapi **kelonggaran janji** (`janji_hari − jumlah_transit`) turun rapi: makin mepet janjinya, makin sering terlambat.
+
+> ✅ Ketiga temuan ini menjadi fitur buatan `volume_hub_kemarin`, `volume_kemarin_tinggi`, `kelonggaran_janji`, dan `pickup_malam`.
+
 ## Hasil
 
 Split waktu sesuai brief: train Jan–Des 2025 (26.633), validation Jan–Mar 2026 (6.623), test Apr–Jun 2026 (6.744). PR-AUC dihitung sebagai *average precision*.
@@ -82,7 +121,8 @@ train.py                          melatih ulang model final dari data (tanpa mem
 artifacts/                        model.joblib + metadata.json (versi, fitur, threshold, metrik) + hasil_test.json
 app/                              API FastAPI (app/api/main.py) dan halaman aplikasi (app/static/index.html)
 tests/                            unit test cleaning, fitur, pelatihan, dan validasi masukan
-docs/                             diagram arsitektur (svg + png)
+docs/                             diagram arsitektur (svg + png) dan grafik EDA (docs/eda/)
+scripts/grafik_eda.py             membuat ulang grafik EDA dari data train
 ```
 
 ## Keterbatasan
